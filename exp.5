@@ -1,0 +1,164 @@
+LoginApp/
+│
+├── index.jsp
+├── login.jsp
+├── dashboard.jsp
+│
+├── WEB-INF/
+│   ├── web.xml
+│   └── lib/
+│       └── mysql-connector-j.jar
+│
+└── src/
+    ├── DBConnection.java
+    └── LoginServlet.java
+-----------------------------------------------------
+Database Setup (MySQL) :
+
+CREATE DATABASE login_db;
+USE login_db;
+
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL
+);
+
+INSERT INTO users (username, password) VALUES ('admin', 'admin123'), ('soham', '12345');
+--------------------------------------------------------
+
+Index.jsp:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+</head>
+<body>
+    <h2>Login Portal</h2>
+    <form action="LoginServlet" method="post">
+        Username: <input type="text" name="username" required><br><br>
+        Password: <input type="password" name="password" required><br><br>
+        <input type="submit" value="Login">
+    </form>
+    <p style="color:red;">
+        <% if(request.getParameter("error") != null) out.print("Invalid Username or Password!"); %>
+    </p>
+</body>
+</html>
+
+-------------------------------------------------------------
+Dashboard.jsp:
+
+<%@ page import="javax.servlet.http.*,javax.servlet.*" %>
+<%
+    String user = (String) session.getAttribute("username");
+    if (user == null) {
+        response.sendRedirect("index.jsp?error=unauthorized");
+    }
+%>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, <%= user %>!</h2>
+    <p>You have successfully logged in.</p>
+    <form action="LogoutServlet" method="post">
+        <input type="submit" value="Logout">
+    </form>
+</body>
+</html>
+DBConnection.java :
+
+import java.sql.*;
+
+public class DBConnection {
+    private static final String URL = "jdbc:mysql://localhost:3306/login_db";
+    private static final String USER = "root"; // your MySQL username
+    private static final String PASSWORD = ""; // your MySQL password
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+}
+LoginServlet.java :
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.sql.*;
+
+public class LoginServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        res.setContentType("text/html");
+        String username = req.getParameter("username");
+        String password = req.getParameter("password");
+
+        try (Connection con = DBConnection.getConnection()) {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM users WHERE username=? AND password=?");
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                HttpSession session = req.getSession();
+                session.setAttribute("username", username);
+                res.sendRedirect("dashboard.jsp");
+            } else {
+                res.sendRedirect("index.jsp?error=true");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+LogoutServlet.java :
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+public class LogoutServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        res.sendRedirect("index.jsp");
+    }
+}
+
+web.xml :
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>LoginServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/LoginServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>LogoutServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/LogoutServlet</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+</web-app>
