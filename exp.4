@@ -1,0 +1,99 @@
+EXP4
+└── ServletDemo
+    ├── WEB-INF
+        └── web.xml
+    ├── index.html
+    └── src
+        ├── GenericDemo.java
+        └── HttpDemo.java
+
+
+/ServletDemo/WEB-INF/web.xml:
+----------------------------------
+ 1 | <?xml version="1.0" encoding="UTF-8"?>
+ 2 | <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+ 3 |          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ 4 |          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+ 5 |          http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+ 6 |          version="4.0">
+ 7 |     
+ 8 |     <servlet>
+ 9 |         <servlet-name>GenericDemo</servlet-name>
+10 |         <servlet-class>GenericDemo</servlet-class>
+11 |     </servlet>
+12 |     <servlet-mapping>
+13 |         <servlet-name>GenericDemo</servlet-name>
+14 |         <url-pattern>/generic</url-pattern>
+15 |     </servlet-mapping>
+16 | 
+17 |     <servlet>
+18 |         <servlet-name>HttpDemo</servlet-name>
+19 |         <servlet-class>HttpDemo</servlet-class>
+20 |     </servlet>
+21 |     <servlet-mapping>
+22 |         <servlet-name>HttpDemo</servlet-name>
+23 |         <url-pattern>/http</url-pattern>
+24 |     </servlet-mapping>
+25 | 
+26 | </web-app>
+27 | 
+
+
+----------------------------------
+/ServletDemo/index.html:
+----------------------------------
+ 1 | <!DOCTYPE html>
+ 2 | <html>
+ 3 | <head><title>Servlet Demo</title></head>
+ 4 | <body>
+ 5 |     <h1>Servlet Demonstration</h1>
+ 6 |     <ul>
+ 7 |         <li><a href="generic">GenericServlet Example</a></li>
+ 8 |         <li><a href="http">HttpServlet Example</a></li>
+ 9 |     </ul>
+10 | </body>
+11 | </html>
+12 | 
+
+
+----------------------------------
+/ServletDemo/src/GenericDemo.java:
+----------------------------------
+ 1 | import java.io.*;
+ 2 | import javax.servlet.*;
+ 3 | 
+ 4 | public class GenericDemo extends GenericServlet {
+ 5 |     public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+ 6 |         res.setContentType("text/html");
+ 7 |         PrintWriter out = res.getWriter();
+ 8 |         out.println("<html><body>");
+ 9 |         out.println("<h2>GenericServlet Example</h2>");
+10 |         out.println("<p>This servlet runs using GenericServlet class.</p>");
+11 |         out.println("</body></html>");
+12 |     }
+13 | }
+14 | 
+
+
+------------------------------
+/ServletDemo/src/HttpDemo.java:
+-------------------------------
+ 1 | import java.io.*;
+ 2 | import javax.servlet.*;
+ 3 | import javax.servlet.http.*;
+ 4 | 
+ 5 | public class HttpDemo extends HttpServlet {
+ 6 |     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+ 7 |         res.setContentType("text/html");
+ 8 |         PrintWriter out = res.getWriter();
+ 9 |         out.println("<html><body>");
+10 |         out.println("<h2>HttpServlet Example</h2>");
+11 |         out.println("<p>This servlet handles HTTP requests (GET method).</p>");
+12 |         out.println("</body></html>");
+13 |     }
+14 | 
+15 |     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+16 |         doGet(req, res);
+17 |     }
+18 | }
+19 |
